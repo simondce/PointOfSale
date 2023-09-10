@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PSKCrackers.Migrations
 {
-    public partial class psk : Migration
+    public partial class PSK : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -66,17 +66,16 @@ namespace PSKCrackers.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "InventoryLocations",
+                name: "ProductTypes",
                 columns: table => new
                 {
-                    InventoryLocationId = table.Column<int>(type: "int", nullable: false)
+                    ProductTypeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InventoryLocations", x => x.InventoryLocationId);
+                    table.PrimaryKey("PK_ProductTypes", x => x.ProductTypeId);
                 });
 
             migrationBuilder.CreateTable(
@@ -87,7 +86,8 @@ namespace PSKCrackers.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -207,9 +207,8 @@ namespace PSKCrackers.Migrations
                     SaleId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SaleDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    DiscountPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CustomerId = table.Column<int>(type: "int", nullable: false)
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
+                    DiscountPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -223,27 +222,6 @@ namespace PSKCrackers.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GoodsReceived",
-                columns: table => new
-                {
-                    GoodsReceivedId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ReceiptDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalReceivedCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SupplierId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GoodsReceived", x => x.GoodsReceivedId);
-                    table.ForeignKey(
-                        name: "FK_GoodsReceived_Suppliers_SupplierId",
-                        column: x => x.SupplierId,
-                        principalTable: "Suppliers",
-                        principalColumn: "SupplierId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Products",
                 columns: table => new
                 {
@@ -251,7 +229,7 @@ namespace PSKCrackers.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Barcode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProductTypeId = table.Column<int>(type: "int", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     SupplierId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -259,11 +237,17 @@ namespace PSKCrackers.Migrations
                 {
                     table.PrimaryKey("PK_Products", x => x.ProductId);
                     table.ForeignKey(
+                        name: "FK_Products_ProductTypes_ProductTypeId",
+                        column: x => x.ProductTypeId,
+                        principalTable: "ProductTypes",
+                        principalColumn: "ProductTypeId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Products_Suppliers_SupplierId",
                         column: x => x.SupplierId,
                         principalTable: "Suppliers",
                         principalColumn: "SupplierId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -273,7 +257,7 @@ namespace PSKCrackers.Migrations
                     PurchaseOrderId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalOrderCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     SupplierId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -288,65 +272,23 @@ namespace PSKCrackers.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GoodsReceivedItems",
-                columns: table => new
-                {
-                    GoodsReceivedItemId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    QuantityReceived = table.Column<int>(type: "int", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    GoodsReceivedId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GoodsReceivedItems", x => x.GoodsReceivedItemId);
-                    table.ForeignKey(
-                        name: "FK_GoodsReceivedItems_GoodsReceived_GoodsReceivedId",
-                        column: x => x.GoodsReceivedId,
-                        principalTable: "GoodsReceived",
-                        principalColumn: "GoodsReceivedId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_GoodsReceivedItems_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "ProductId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "InventoryItems",
                 columns: table => new
                 {
                     InventoryItemId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(type: "int", nullable: false),
-                    QuantityInStock = table.Column<int>(type: "int", nullable: false),
-                    LastRestocked = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    InventoryLocationId = table.Column<int>(type: "int", nullable: false),
-                    ProductId1 = table.Column<int>(type: "int", nullable: true)
+                    QuantityInStock = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_InventoryItems", x => x.InventoryItemId);
-                    table.ForeignKey(
-                        name: "FK_InventoryItems_InventoryLocations_InventoryLocationId",
-                        column: x => x.InventoryLocationId,
-                        principalTable: "InventoryLocations",
-                        principalColumn: "InventoryLocationId",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_InventoryItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "ProductId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_InventoryItems_Products_ProductId1",
-                        column: x => x.ProductId1,
-                        principalTable: "Products",
-                        principalColumn: "ProductId");
                 });
 
             migrationBuilder.CreateTable(
@@ -386,8 +328,7 @@ namespace PSKCrackers.Migrations
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PurchaseOrderId = table.Column<int>(type: "int", nullable: false),
-                    ProductId1 = table.Column<int>(type: "int", nullable: true)
+                    PurchaseOrderId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -398,11 +339,6 @@ namespace PSKCrackers.Migrations
                         principalTable: "Products",
                         principalColumn: "ProductId",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PurchaseOrderItems_Products_ProductId1",
-                        column: x => x.ProductId1,
-                        principalTable: "Products",
-                        principalColumn: "ProductId");
                     table.ForeignKey(
                         name: "FK_PurchaseOrderItems_PurchaseOrders_PurchaseOrderId",
                         column: x => x.PurchaseOrderId,
@@ -451,34 +387,14 @@ namespace PSKCrackers.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GoodsReceived_SupplierId",
-                table: "GoodsReceived",
-                column: "SupplierId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GoodsReceivedItems_GoodsReceivedId",
-                table: "GoodsReceivedItems",
-                column: "GoodsReceivedId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GoodsReceivedItems_ProductId",
-                table: "GoodsReceivedItems",
-                column: "ProductId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_InventoryItems_InventoryLocationId",
-                table: "InventoryItems",
-                column: "InventoryLocationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_InventoryItems_ProductId",
                 table: "InventoryItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_InventoryItems_ProductId1",
-                table: "InventoryItems",
-                column: "ProductId1");
+                name: "IX_Products_ProductTypeId",
+                table: "Products",
+                column: "ProductTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_SupplierId",
@@ -489,11 +405,6 @@ namespace PSKCrackers.Migrations
                 name: "IX_PurchaseOrderItems_ProductId",
                 table: "PurchaseOrderItems",
                 column: "ProductId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PurchaseOrderItems_ProductId1",
-                table: "PurchaseOrderItems",
-                column: "ProductId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PurchaseOrderItems_PurchaseOrderId",
@@ -539,9 +450,6 @@ namespace PSKCrackers.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "GoodsReceivedItems");
-
-            migrationBuilder.DropTable(
                 name: "InventoryItems");
 
             migrationBuilder.DropTable(
@@ -557,12 +465,6 @@ namespace PSKCrackers.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "GoodsReceived");
-
-            migrationBuilder.DropTable(
-                name: "InventoryLocations");
-
-            migrationBuilder.DropTable(
                 name: "PurchaseOrders");
 
             migrationBuilder.DropTable(
@@ -570,6 +472,9 @@ namespace PSKCrackers.Migrations
 
             migrationBuilder.DropTable(
                 name: "Sales");
+
+            migrationBuilder.DropTable(
+                name: "ProductTypes");
 
             migrationBuilder.DropTable(
                 name: "Suppliers");

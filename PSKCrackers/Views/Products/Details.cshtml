@@ -1,11 +1,8 @@
-﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@{
-    Layout = "/Pages/Shared/_Layout.cshtml";
-}
-@model PSKCrackers.Models.Product
+﻿@model PSKCrackers.Models.Product
 
 @{
     ViewData["Title"] = "Details";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
 <h1>Details</h1>
@@ -27,10 +24,10 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Barcode)
+            @Html.DisplayNameFor(model => model.ProductType)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Barcode)
+            @Html.DisplayFor(model => model.ProductType.Name)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Price)
@@ -42,11 +39,11 @@
             @Html.DisplayNameFor(model => model.Supplier)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Supplier.Name)
+            @Html.DisplayFor(model => model.Supplier.Address)
         </dd>
     </dl>
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.ProductId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-cancel">Back to List</a>
 </div>

@@ -2,114 +2,109 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PSKCrackers.Data;
-using PSKCrackers.Helpers;
 using PSKCrackers.Models;
 
 namespace PSKCrackers.Controllers
 {
-    [Authorize]
-    public class CustomersController : Controller
+    public class ProductTypesController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public CustomersController(ApplicationDbContext context)
+        public ProductTypesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Customers
+        // GET: ProductTypes
         public async Task<IActionResult> Index()
         {
-              return _context.Customers != null ? 
-                          View(await _context.Customers.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.Customers'  is null.");
+              return _context.ProductTypes != null ? 
+                          View(await _context.ProductTypes.ToListAsync()) :
+                          Problem("Entity set 'ApplicationDbContext.ProductTypes'  is null.");
         }
 
-        // GET: Customers/Details/5
+        // GET: ProductTypes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Customers == null)
+            if (id == null || _context.ProductTypes == null)
             {
                 return NotFound();
             }
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(m => m.CustomerId == id);
-            if (customer == null)
+            var productType = await _context.ProductTypes
+                .FirstOrDefaultAsync(m => m.ProductTypeId == id);
+            if (productType == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(productType);
         }
 
-        // GET: Customers/Create
+        // GET: ProductTypes/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Customers/Create
+        // POST: ProductTypes/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CustomerId,Name,Email,PhoneNumber,DateOfBirth,Address")] Customer customer)
+        public async Task<IActionResult> Create([Bind("ProductTypeId,Name")] ProductType productType)
         {
-            Utils.removeVirtualProperties(customer, ModelState);
             if (ModelState.IsValid)
             {
-                _context.Add(customer);
+                _context.Add(productType);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(customer);
+            return View(productType);
         }
 
-        // GET: Customers/Edit/5
+        // GET: ProductTypes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Customers == null)
+            if (id == null || _context.ProductTypes == null)
             {
                 return NotFound();
             }
 
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
+            var productType = await _context.ProductTypes.FindAsync(id);
+            if (productType == null)
             {
                 return NotFound();
             }
-            return View(customer);
+            return View(productType);
         }
 
-        // POST: Customers/Edit/5
+        // POST: ProductTypes/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CustomerId,Name,Email,PhoneNumber,DateOfBirth,Address")] Customer customer)
+        public async Task<IActionResult> Edit(int id, [Bind("ProductTypeId,Name")] ProductType productType)
         {
-            if (id != customer.CustomerId)
+            if (id != productType.ProductTypeId)
             {
                 return NotFound();
             }
 
-            Utils.removeVirtualProperties(customer, ModelState);
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(customer);
+                    _context.Update(productType);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CustomerExists(customer.CustomerId))
+                    if (!ProductTypeExists(productType.ProductTypeId))
                     {
                         return NotFound();
                     }
@@ -120,49 +115,49 @@ namespace PSKCrackers.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(customer);
+            return View(productType);
         }
 
-        // GET: Customers/Delete/5
+        // GET: ProductTypes/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Customers == null)
+            if (id == null || _context.ProductTypes == null)
             {
                 return NotFound();
             }
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(m => m.CustomerId == id);
-            if (customer == null)
+            var productType = await _context.ProductTypes
+                .FirstOrDefaultAsync(m => m.ProductTypeId == id);
+            if (productType == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            return View(productType);
         }
 
-        // POST: Customers/Delete/5
+        // POST: ProductTypes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Customers == null)
+            if (_context.ProductTypes == null)
             {
-                return Problem("Entity set 'ApplicationDbContext.Customers'  is null.");
+                return Problem("Entity set 'ApplicationDbContext.ProductTypes'  is null.");
             }
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer != null)
+            var productType = await _context.ProductTypes.FindAsync(id);
+            if (productType != null)
             {
-                _context.Customers.Remove(customer);
+                _context.ProductTypes.Remove(productType);
             }
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CustomerExists(int id)
+        private bool ProductTypeExists(int id)
         {
-          return (_context.Customers?.Any(e => e.CustomerId == id)).GetValueOrDefault();
+          return (_context.ProductTypes?.Any(e => e.ProductTypeId == id)).GetValueOrDefault();
         }
     }
 }

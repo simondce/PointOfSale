@@ -49,7 +49,7 @@ namespace PSKCrackers.Controllers
         // GET: PurchaseOrders/Create
         public IActionResult Create()
         {
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name");
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address");
             return View();
         }
 
@@ -58,7 +58,7 @@ namespace PSKCrackers.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PurchaseOrderId,OrderDate,TotalCost,SupplierId")] PurchaseOrder purchaseOrder)
+        public async Task<IActionResult> Create([Bind("PurchaseOrderId,OrderDate,TotalOrderCost,SupplierId")] PurchaseOrder purchaseOrder)
         {
             Utils.removeVirtualProperties(purchaseOrder, ModelState);
             if (ModelState.IsValid)
@@ -67,7 +67,7 @@ namespace PSKCrackers.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", purchaseOrder.SupplierId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", purchaseOrder.SupplierId);
             return View(purchaseOrder);
         }
 
@@ -84,7 +84,7 @@ namespace PSKCrackers.Controllers
             {
                 return NotFound();
             }
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", purchaseOrder.SupplierId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", purchaseOrder.SupplierId);
             return View(purchaseOrder);
         }
 
@@ -93,7 +93,7 @@ namespace PSKCrackers.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PurchaseOrderId,OrderDate,TotalCost,SupplierId")] PurchaseOrder purchaseOrder)
+        public async Task<IActionResult> Edit(int id, [Bind("PurchaseOrderId,OrderDate,TotalOrderCost,SupplierId")] PurchaseOrder purchaseOrder)
         {
             if (id != purchaseOrder.PurchaseOrderId)
             {
@@ -121,7 +121,7 @@ namespace PSKCrackers.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", purchaseOrder.SupplierId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", purchaseOrder.SupplierId);
             return View(purchaseOrder);
         }
 

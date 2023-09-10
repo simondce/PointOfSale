@@ -23,7 +23,7 @@ namespace PSKCrackers.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Products.Include(p => p.Supplier);
+            var applicationDbContext = _context.Products.Include(p => p.ProductType).Include(p => p.Supplier);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -36,6 +36,7 @@ namespace PSKCrackers.Controllers
             }
 
             var product = await _context.Products
+                .Include(p => p.ProductType)
                 .Include(p => p.Supplier)
                 .FirstOrDefaultAsync(m => m.ProductId == id);
             if (product == null)
@@ -49,7 +50,8 @@ namespace PSKCrackers.Controllers
         // GET: Products/Create
         public IActionResult Create()
         {
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name");
+            ViewData["ProductTypeId"] = new SelectList(_context.ProductTypes, "ProductTypeId", "Name");
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address");
             return View();
         }
 
@@ -58,7 +60,7 @@ namespace PSKCrackers.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,Name,Description,Barcode,Price,SupplierId")] Product product)
+        public async Task<IActionResult> Create([Bind("ProductId,Name,Description,ProductTypeId,Price,SupplierId")] Product product)
         {
             Utils.removeVirtualProperties(product, ModelState);
             if (ModelState.IsValid)
@@ -67,7 +69,8 @@ namespace PSKCrackers.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
+            ViewData["ProductTypeId"] = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", product.SupplierId);
             return View(product);
         }
 
@@ -84,7 +87,8 @@ namespace PSKCrackers.Controllers
             {
                 return NotFound();
             }
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
+            ViewData["ProductTypeId"] = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", product.SupplierId);
             return View(product);
         }
 
@@ -93,12 +97,13 @@ namespace PSKCrackers.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Description,Barcode,Price,SupplierId")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Description,ProductTypeId,Price,SupplierId")] Product product)
         {
             if (id != product.ProductId)
             {
                 return NotFound();
             }
+
             Utils.removeVirtualProperties(product, ModelState);
             if (ModelState.IsValid)
             {
@@ -120,7 +125,8 @@ namespace PSKCrackers.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
+            ViewData["ProductTypeId"] = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", product.SupplierId);
             return View(product);
         }
 
@@ -133,6 +139,7 @@ namespace PSKCrackers.Controllers
             }
 
             var product = await _context.Products
+                .Include(p => p.ProductType)
                 .Include(p => p.Supplier)
                 .FirstOrDefaultAsync(m => m.ProductId == id);
             if (product == null)

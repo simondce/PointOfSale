@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -58,7 +57,7 @@ namespace PSKCrackers.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("SupplierId,Name,Email,PhoneNumber")] Supplier supplier)
+        public async Task<IActionResult> Create([Bind("SupplierId,Name,Email,PhoneNumber,Address")] Supplier supplier)
         {
             Utils.removeVirtualProperties(supplier, ModelState);
             if (ModelState.IsValid)
@@ -67,7 +66,6 @@ namespace PSKCrackers.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-                        
             return View(supplier);
         }
 
@@ -92,7 +90,7 @@ namespace PSKCrackers.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("SupplierId,Name,Email,PhoneNumber")] Supplier supplier)
+        public async Task<IActionResult> Edit(int id, [Bind("SupplierId,Name,Email,PhoneNumber,Address")] Supplier supplier)
         {
             if (id != supplier.SupplierId)
             {
@@ -100,7 +98,6 @@ namespace PSKCrackers.Controllers
             }
 
             Utils.removeVirtualProperties(supplier, ModelState);
-
             if (ModelState.IsValid)
             {
                 try
@@ -165,6 +162,5 @@ namespace PSKCrackers.Controllers
         {
           return (_context.Suppliers?.Any(e => e.SupplierId == id)).GetValueOrDefault();
         }
-
     }
 }

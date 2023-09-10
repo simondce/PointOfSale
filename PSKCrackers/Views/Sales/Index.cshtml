@@ -1,17 +1,14 @@
-﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@{
-    Layout = "/Pages/Shared/_Layout.cshtml";
-}
-@model IEnumerable<PSKCrackers.Models.Sale>
+﻿@model IEnumerable<PSKCrackers.Models.Sale>
 
 @{
     ViewData["Title"] = "Index";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
 <h1>Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -20,13 +17,10 @@
                 @Html.DisplayNameFor(model => model.SaleDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.TotalAmount)
+                @Html.DisplayNameFor(model => model.Customer)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.DiscountPercentage)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Customer)
             </th>
             <th></th>
         </tr>
@@ -38,13 +32,10 @@
                 @Html.DisplayFor(modelItem => item.SaleDate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.TotalAmount)
+                @Html.DisplayFor(modelItem => item.Customer.Address)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.DiscountPercentage)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Customer.Address)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.SaleId">Edit</a> |

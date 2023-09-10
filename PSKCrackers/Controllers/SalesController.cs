@@ -58,7 +58,7 @@ namespace PSKCrackers.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("SaleId,SaleDate,TotalAmount,DiscountPercentage,CustomerId")] Sale sale)
+        public async Task<IActionResult> Create([Bind("SaleId,SaleDate,CustomerId,DiscountPercentage")] Sale sale)
         {
             Utils.removeVirtualProperties(sale, ModelState);
             if (ModelState.IsValid)
@@ -93,7 +93,7 @@ namespace PSKCrackers.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("SaleId,SaleDate,TotalAmount,DiscountPercentage,CustomerId")] Sale sale)
+        public async Task<IActionResult> Edit(int id, [Bind("SaleId,SaleDate,CustomerId,DiscountPercentage")] Sale sale)
         {
             if (id != sale.SaleId)
             {

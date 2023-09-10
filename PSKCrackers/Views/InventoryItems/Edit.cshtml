@@ -1,0 +1,40 @@
+﻿@model PSKCrackers.Models.InventoryItem
+
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h1>Edit</h1>
+
+<h4>InventoryItem</h4>
+<hr />
+<div class="row">
+    <div class="col-md-10">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="InventoryItemId" />
+            <div class="form-group">
+                <label asp-for="ProductId" class="control-label"></label>
+                <select asp-for="ProductId" class="form-control" asp-items="ViewBag.ProductId"></select>
+                <span asp-validation-for="ProductId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="QuantityInStock" class="control-label"></label>
+                <input asp-for="QuantityInStock" class="form-control" />
+                <span asp-validation-for="QuantityInStock" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" class="btn btn-cancel">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

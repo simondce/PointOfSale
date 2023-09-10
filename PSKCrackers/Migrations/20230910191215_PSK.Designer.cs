@@ -12,8 +12,8 @@ using PSKCrackers.Data;
 namespace PSKCrackers.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230910183554_psk2")]
-    partial class psk2
+    [Migration("20230910191215_PSK")]
+    partial class PSK
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -255,7 +255,7 @@ namespace PSKCrackers.Migrations
 
                     b.HasKey("CustomerId");
 
-                    b.ToTable("Customers");
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("PSKCrackers.Models.InventoryItem", b =>
@@ -266,16 +266,7 @@ namespace PSKCrackers.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventoryItemId"), 1L, 1);
 
-                    b.Property<int>("InventoryLocationId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("LastRestocked")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProductId1")
                         .HasColumnType("int");
 
                     b.Property<int>("QuantityInStock")
@@ -283,34 +274,9 @@ namespace PSKCrackers.Migrations
 
                     b.HasKey("InventoryItemId");
 
-                    b.HasIndex("InventoryLocationId");
-
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("ProductId1");
-
-                    b.ToTable("InventoryItems");
-                });
-
-            modelBuilder.Entity("PSKCrackers.Models.InventoryLocation", b =>
-                {
-                    b.Property<int>("InventoryLocationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InventoryLocationId"), 1L, 1);
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("InventoryLocationId");
-
-                    b.ToTable("InventoryLocations");
+                    b.ToTable("InventoryItems", (string)null);
                 });
 
             modelBuilder.Entity("PSKCrackers.Models.Product", b =>
@@ -320,10 +286,6 @@ namespace PSKCrackers.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"), 1L, 1);
-
-                    b.Property<string>("Barcode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -336,14 +298,36 @@ namespace PSKCrackers.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("ProductTypeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
                     b.HasKey("ProductId");
 
+                    b.HasIndex("ProductTypeId");
+
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("PSKCrackers.Models.ProductType", b =>
+                {
+                    b.Property<int>("ProductTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductTypeId"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProductTypeId");
+
+                    b.ToTable("ProductTypes", (string)null);
                 });
 
             modelBuilder.Entity("PSKCrackers.Models.PurchaseOrder", b =>
@@ -360,14 +344,14 @@ namespace PSKCrackers.Migrations
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("TotalCost")
+                    b.Property<decimal>("TotalOrderCost")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("PurchaseOrderId");
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("PurchaseOrders");
+                    b.ToTable("PurchaseOrders", (string)null);
                 });
 
             modelBuilder.Entity("PSKCrackers.Models.PurchaseOrderItem", b =>
@@ -379,9 +363,6 @@ namespace PSKCrackers.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PurchaseOrderItemId"), 1L, 1);
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ProductId1")
                         .HasColumnType("int");
 
                     b.Property<int>("PurchaseOrderId")
@@ -397,11 +378,9 @@ namespace PSKCrackers.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("ProductId1");
-
                     b.HasIndex("PurchaseOrderId");
 
-                    b.ToTable("PurchaseOrderItems");
+                    b.ToTable("PurchaseOrderItems", (string)null);
                 });
 
             modelBuilder.Entity("PSKCrackers.Models.Sale", b =>
@@ -415,20 +394,17 @@ namespace PSKCrackers.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("DiscountPercentage")
+                    b.Property<decimal?>("DiscountPercentage")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("SaleDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("SaleId");
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Sales");
+                    b.ToTable("Sales", (string)null);
                 });
 
             modelBuilder.Entity("PSKCrackers.Models.SaleItem", b =>
@@ -457,7 +433,7 @@ namespace PSKCrackers.Migrations
 
                     b.HasIndex("SaleId");
 
-                    b.ToTable("SaleItems");
+                    b.ToTable("SaleItems", (string)null);
                 });
 
             modelBuilder.Entity("PSKCrackers.Models.Supplier", b =>
@@ -467,6 +443,10 @@ namespace PSKCrackers.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SupplierId"), 1L, 1);
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -482,7 +462,7 @@ namespace PSKCrackers.Migrations
 
                     b.HasKey("SupplierId");
 
-                    b.ToTable("Suppliers");
+                    b.ToTable("Suppliers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -538,34 +518,30 @@ namespace PSKCrackers.Migrations
 
             modelBuilder.Entity("PSKCrackers.Models.InventoryItem", b =>
                 {
-                    b.HasOne("PSKCrackers.Models.InventoryLocation", "InventoryLocation")
-                        .WithMany("InventoryItems")
-                        .HasForeignKey("InventoryLocationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("PSKCrackers.Models.Product", "Product")
-                        .WithMany()
+                        .WithMany("InventoryItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("PSKCrackers.Models.Product", null)
-                        .WithMany("InventoryItems")
-                        .HasForeignKey("ProductId1");
-
-                    b.Navigation("InventoryLocation");
 
                     b.Navigation("Product");
                 });
 
             modelBuilder.Entity("PSKCrackers.Models.Product", b =>
                 {
+                    b.HasOne("PSKCrackers.Models.ProductType", "ProductType")
+                        .WithMany()
+                        .HasForeignKey("ProductTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("PSKCrackers.Models.Supplier", "Supplier")
                         .WithMany("SuppliedProducts")
                         .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ProductType");
 
                     b.Navigation("Supplier");
                 });
@@ -584,14 +560,10 @@ namespace PSKCrackers.Migrations
             modelBuilder.Entity("PSKCrackers.Models.PurchaseOrderItem", b =>
                 {
                     b.HasOne("PSKCrackers.Models.Product", "Product")
-                        .WithMany()
+                        .WithMany("PurchaseOrderItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("PSKCrackers.Models.Product", null)
-                        .WithMany("PurchaseOrderItems")
-                        .HasForeignKey("ProductId1");
 
                     b.HasOne("PSKCrackers.Models.PurchaseOrder", "PurchaseOrder")
                         .WithMany("PurchaseOrderItems")
@@ -637,11 +609,6 @@ namespace PSKCrackers.Migrations
             modelBuilder.Entity("PSKCrackers.Models.Customer", b =>
                 {
                     b.Navigation("Sales");
-                });
-
-            modelBuilder.Entity("PSKCrackers.Models.InventoryLocation", b =>
-                {
-                    b.Navigation("InventoryItems");
                 });
 
             modelBuilder.Entity("PSKCrackers.Models.Product", b =>
