@@ -19,8 +19,6 @@ namespace PSKCrackers.Data
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
-        public DbSet<GoodsReceived> GoodsReceived { get; set; }
-        public DbSet<GoodsReceivedItem> GoodsReceivedItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -64,17 +62,6 @@ namespace PSKCrackers.Data
                 .HasOne(poi => poi.Product)
                 .WithMany()
                 .HasForeignKey(poi => poi.ProductId);
-
-            modelBuilder.Entity<GoodsReceived>()
-                .HasOne(gr => gr.Supplier)
-                .WithMany(s => s.GoodsReceived)
-                .HasForeignKey(gr => gr.SupplierId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<GoodsReceivedItem>()
-                .HasOne(gri => gri.Product)
-                .WithMany()
-                .HasForeignKey(gri => gri.ProductId);
         }
     }
 }

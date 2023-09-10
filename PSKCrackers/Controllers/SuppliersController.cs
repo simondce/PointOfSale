@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PSKCrackers.Data;
+using PSKCrackers.Helpers;
 using PSKCrackers.Models;
 
 namespace PSKCrackers.Controllers
@@ -58,12 +60,14 @@ namespace PSKCrackers.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("SupplierId,Name,Email,PhoneNumber")] Supplier supplier)
         {
+            Utils.removeVirtualProperties(supplier, ModelState);
             if (ModelState.IsValid)
             {
                 _context.Add(supplier);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+                        
             return View(supplier);
         }
 
@@ -94,6 +98,8 @@ namespace PSKCrackers.Controllers
             {
                 return NotFound();
             }
+
+            Utils.removeVirtualProperties(supplier, ModelState);
 
             if (ModelState.IsValid)
             {
@@ -159,5 +165,6 @@ namespace PSKCrackers.Controllers
         {
           return (_context.Suppliers?.Any(e => e.SupplierId == id)).GetValueOrDefault();
         }
+
     }
 }

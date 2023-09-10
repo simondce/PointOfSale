@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using PSKCrackers.Data;
+using PSKCrackers.Helpers;
 using PSKCrackers.Models;
 
 namespace PSKCrackers.Controllers
@@ -58,6 +59,7 @@ namespace PSKCrackers.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CustomerId,Name,Email,PhoneNumber,DateOfBirth,Address")] Customer customer)
         {
+            Utils.removeVirtualProperties(customer, ModelState);
             if (ModelState.IsValid)
             {
                 _context.Add(customer);
@@ -94,7 +96,7 @@ namespace PSKCrackers.Controllers
             {
                 return NotFound();
             }
-
+            Utils.removeVirtualProperties(customer, ModelState);
             if (ModelState.IsValid)
             {
                 try

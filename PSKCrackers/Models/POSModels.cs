@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Runtime.InteropServices;
+    using System.Runtime.Serialization;
 
     public class Product
     {
@@ -166,9 +168,6 @@
 
         // Navigation property for PurchaseOrders (supplier's purchase orders)
         public virtual ICollection<PurchaseOrder> PurchaseOrders { get; set; }
-
-        // Navigation property for GoodsReceived (supplier's goods received notes)
-        public virtual ICollection<GoodsReceived> GoodsReceived { get; set; }
     }
 
     public class PurchaseOrder
@@ -217,50 +216,5 @@
         public virtual Product Product { get; set; }
     }
 
-    public class GoodsReceived
-    {
-        public int GoodsReceivedId { get; set; }
-
-        [Required(ErrorMessage = "Receipt date is required.")]
-        [DataType(DataType.DateTime)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm:ss}", ApplyFormatInEditMode = true)]
-        [Display(Name = "Receipt Date")]
-        public DateTime ReceiptDate { get; set; }
-
-        [Required(ErrorMessage = "Total received cost is required.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Total received cost must be greater than 0.")]
-        [DataType(DataType.Currency)]
-        public decimal TotalReceivedCost { get; set; }
-
-        // Foreign key for Supplier
-        public int SupplierId { get; set; }
-        public virtual Supplier Supplier { get; set; }
-
-        // Navigation property for GoodsReceivedItems (items in the receipt)
-        public virtual ICollection<GoodsReceivedItem> GoodsReceivedItems { get; set; }
-    }
-
-    public class GoodsReceivedItem
-    {
-        public int GoodsReceivedItemId { get; set; }
-
-        [Required(ErrorMessage = "Product is required.")]
-        public int ProductId { get; set; }
-
-        [Required(ErrorMessage = "Quantity received is required.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
-        public int QuantityReceived { get; set; }
-
-        [Required(ErrorMessage = "Unit Price is required.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Unit Price must be greater than 0.")]
-        public decimal UnitPrice { get; set; }
-
-        // Foreign key for GoodsReceived
-        public int GoodsReceivedId { get; set; }
-        public virtual GoodsReceived GoodsReceived { get; set; }
-
-        // Navigation property for Product
-        public virtual Product Product { get; set; }
-    }
 
 }
