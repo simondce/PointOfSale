@@ -78,7 +78,6 @@
         public DateTime OrderDate { get; set; }
 
         [Required(ErrorMessage = "Total order cost is required.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Total order cost must be greater than 0.")]
         [DataType(DataType.Currency)]
         public decimal TotalOrderCost { get; set; }
 
@@ -87,7 +86,7 @@
         public virtual Supplier Supplier { get; set; }
 
         // Navigation property for PurchaseOrderItems (items in the order)
-        public virtual ICollection<PurchaseOrderItem> PurchaseOrderItems { get; set; }
+        public virtual List<PurchaseOrderItem> PurchaseOrderItems { get; set; }
     }
 
     public class PurchaseOrderItem

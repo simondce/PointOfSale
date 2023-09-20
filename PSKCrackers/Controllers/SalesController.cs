@@ -49,7 +49,7 @@ namespace PSKCrackers.Controllers
         // GET: Sales/Create
         public IActionResult Create()
         {
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Address");
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name");
             return View();
         }
 
@@ -67,7 +67,7 @@ namespace PSKCrackers.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Address", sale.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name", sale.CustomerId);
             return View(sale);
         }
 
@@ -84,7 +84,7 @@ namespace PSKCrackers.Controllers
             {
                 return NotFound();
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Address", sale.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name", sale.CustomerId);
             return View(sale);
         }
 
@@ -121,7 +121,7 @@ namespace PSKCrackers.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Address", sale.CustomerId);
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name", sale.CustomerId);
             return View(sale);
         }
 

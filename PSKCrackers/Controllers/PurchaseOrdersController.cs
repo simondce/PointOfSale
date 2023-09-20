@@ -28,6 +28,34 @@ namespace PSKCrackers.Controllers
         }
 
         // GET: PurchaseOrders/Details/5
+        public async Task<IActionResult> ManagePO(int? id)
+        {
+            if (id == null || _context.PurchaseOrders == null)
+            {
+                return NotFound();
+            }
+
+            var purchaseOrder = await _context.PurchaseOrders
+                .Include(p => p.Supplier)
+                .Include(p => p.PurchaseOrderItems)
+                .FirstOrDefaultAsync(m => m.PurchaseOrderId == id);
+            if (purchaseOrder == null)
+            {
+                return NotFound();
+            }
+
+            foreach (var product in _context.Products.Where(u => u.SupplierId == purchaseOrder.SupplierId))
+            {
+                if (!purchaseOrder.PurchaseOrderItems.Any(u => u.ProductId == product.ProductId))
+                {
+                    purchaseOrder.PurchaseOrderItems.Add(new PurchaseOrderItem { ProductId = product.ProductId, Product = product, Quantity = 0, UnitPrice = 0 });
+                }
+            }
+
+            return View(purchaseOrder);
+        }
+
+        // GET: PurchaseOrders/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.PurchaseOrders == null)
@@ -49,7 +77,8 @@ namespace PSKCrackers.Controllers
         // GET: PurchaseOrders/Create
         public IActionResult Create()
         {
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address");
+
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name");
             return View();
         }
 
@@ -67,7 +96,22 @@ namespace PSKCrackers.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", purchaseOrder.SupplierId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", purchaseOrder.SupplierId);
+            return View(purchaseOrder);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BulkUpdate(PurchaseOrder purchaseOrder)
+        {
+            Utils.removeVirtualProperties(purchaseOrder, ModelState);
+            //if (ModelState.IsValid)
+            {
+                _context.Add(purchaseOrder);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(ManagePO), purchaseOrder.PurchaseOrderId);
+            }
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", purchaseOrder.SupplierId);
             return View(purchaseOrder);
         }
 
@@ -84,7 +128,7 @@ namespace PSKCrackers.Controllers
             {
                 return NotFound();
             }
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", purchaseOrder.SupplierId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", purchaseOrder.SupplierId);
             return View(purchaseOrder);
         }
 
@@ -121,7 +165,7 @@ namespace PSKCrackers.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", purchaseOrder.SupplierId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", purchaseOrder.SupplierId);
             return View(purchaseOrder);
         }
 
@@ -158,14 +202,14 @@ namespace PSKCrackers.Controllers
             {
                 _context.PurchaseOrders.Remove(purchaseOrder);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PurchaseOrderExists(int id)
         {
-          return (_context.PurchaseOrders?.Any(e => e.PurchaseOrderId == id)).GetValueOrDefault();
+            return (_context.PurchaseOrders?.Any(e => e.PurchaseOrderId == id)).GetValueOrDefault();
         }
     }
 }

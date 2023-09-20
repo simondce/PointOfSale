@@ -1,0 +1,91 @@
+﻿@model PSKCrackers.Models.PurchaseOrder
+
+@{
+    ViewData["Title"] = "ManagePO";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h1>Manage PO</h1>
+
+<div>
+    <h4>PurchaseOrder</h4>
+    <hr />
+    <form asp-action="BulkUpdate">
+        @Html.HiddenFor(u => u.PurchaseOrderId)
+        @Html.HiddenFor(u => u.SupplierId)
+        @Html.HiddenFor(u => u.Supplier)
+        @Html.HiddenFor(u => u.OrderDate)
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.OrderDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.OrderDate)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Supplier)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Supplier.Name)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Supplier.Address)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Supplier.Address)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Supplier.PhoneNumber)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Supplier.PhoneNumber)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Supplier.Email)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Supplier.Email)
+            </dd>
+        </dl>
+        <div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>UnitPrice</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.PurchaseOrderItems != null && Model.PurchaseOrderItems.Count() > 0)
+                    {
+                        @for (int i = 0; i < Model.PurchaseOrderItems.Count(); i++)
+                        {
+
+                            @Html.HiddenFor(u => u.PurchaseOrderItems[i].Product)
+                            @Html.HiddenFor(u => u.PurchaseOrderItems[i].ProductId)
+                            <tr>
+                                <td>
+                                    <span class="editable">@Model.PurchaseOrderItems[i].Product.Name</span>
+                                </td>
+                                <td>
+                                    <input asp-for="PurchaseOrderItems[i].Quantity" class="form-control" />
+                                    <span asp-validation-for="PurchaseOrderItems[i].Quantity" class="text-danger"></span>
+                                </td>
+                                <td>
+                                    <input asp-for="PurchaseOrderItems[i].UnitPrice" class="form-control" />
+                                    <span asp-validation-for="PurchaseOrderItems[i].UnitPrice" class="text-danger"></span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+        </div>
+        <input type="submit" value="Update" class="btn btn-primary" />
+    </form>
+</div>
+<div>
+    <a asp-action="Index" class="btn btn-cancel">Back to List</a>
+</div>

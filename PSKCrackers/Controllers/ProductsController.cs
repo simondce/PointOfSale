@@ -51,7 +51,7 @@ namespace PSKCrackers.Controllers
         public IActionResult Create()
         {
             ViewData["ProductTypeId"] = new SelectList(_context.ProductTypes, "ProductTypeId", "Name");
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address");
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name");
             return View();
         }
 
@@ -70,7 +70,7 @@ namespace PSKCrackers.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["ProductTypeId"] = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", product.SupplierId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
             return View(product);
         }
 
@@ -88,7 +88,7 @@ namespace PSKCrackers.Controllers
                 return NotFound();
             }
             ViewData["ProductTypeId"] = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", product.SupplierId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
             return View(product);
         }
 
@@ -126,7 +126,7 @@ namespace PSKCrackers.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["ProductTypeId"] = new SelectList(_context.ProductTypes, "ProductTypeId", "Name", product.ProductTypeId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Address", product.SupplierId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
             return View(product);
         }
 
