@@ -7,85 +7,215 @@
 
 <h1>Manage PO</h1>
 
-<div>
+<div id="POMasterDiv">
     <h4>PurchaseOrder</h4>
     <hr />
-    <form asp-action="BulkUpdate">
-        @Html.HiddenFor(u => u.PurchaseOrderId)
-        @Html.HiddenFor(u => u.SupplierId)
-        @Html.HiddenFor(u => u.Supplier)
-        @Html.HiddenFor(u => u.OrderDate)
-        <dl class="row">
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.OrderDate)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.OrderDate)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Supplier)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Supplier.Name)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Supplier.Address)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Supplier.Address)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Supplier.PhoneNumber)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Supplier.PhoneNumber)
-            </dd>
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Supplier.Email)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Supplier.Email)
-            </dd>
-        </dl>
-        <div>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>UnitPrice</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.PurchaseOrderItems != null && Model.PurchaseOrderItems.Count() > 0)
-                    {
-                        @for (int i = 0; i < Model.PurchaseOrderItems.Count(); i++)
-                        {
-
-                            @Html.HiddenFor(u => u.PurchaseOrderItems[i].Product)
-                            @Html.HiddenFor(u => u.PurchaseOrderItems[i].ProductId)
-                            <tr>
-                                <td>
-                                    <span class="editable">@Model.PurchaseOrderItems[i].Product.Name</span>
-                                </td>
-                                <td>
-                                    <input asp-for="PurchaseOrderItems[i].Quantity" class="form-control" />
-                                    <span asp-validation-for="PurchaseOrderItems[i].Quantity" class="text-danger"></span>
-                                </td>
-                                <td>
-                                    <input asp-for="PurchaseOrderItems[i].UnitPrice" class="form-control" />
-                                    <span asp-validation-for="PurchaseOrderItems[i].UnitPrice" class="text-danger"></span>
-                                </td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.OrderDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Supplier)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Supplier.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Supplier.Address)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Supplier.Address)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Supplier.PhoneNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Supplier.PhoneNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Supplier.Email)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Supplier.Email)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TotalOrderCost)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TotalOrderCost)
+        </dd>
+    </dl>
+    <div>
+        <div id="productList" style="display:none;">
+            <select class="form-control" style="width: 100%;" name="Product" asp-items="ViewBag.ProductId"></select>
         </div>
-        <input type="submit" value="Update" class="btn btn-primary" />
-    </form>
+        @using (Html.BeginForm())
+        {
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(u => u.PurchaseOrderId)
+            @Html.HiddenFor(u => u.SupplierId)
+
+            <fieldset>
+                <legend>Invoice items</legend>
+                <table id="submissionTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+
+
+                </table>
+                <p>
+                    <button id="add" type="button" class="btn btn-primary">Add</button>
+                </p>
+                <hr />
+
+                <p>
+                    <input type="submit" value="Update PO" class="btn btn-primary" />
+                </p>
+                <p>
+                    <button type="button" id="printButton" onclick="printDiv();">Print</button>
+                </p>
+            </fieldset>
+        }
+
+      
+    </div>
 </div>
 <div>
     <a asp-action="Index" class="btn btn-cancel">Back to List</a>
 </div>
+
+@section Scripts {
+    <script type="text/javascript">
+        var counter = 0;
+        $(function () {
+            var PurchaseOrderItems = JSON.parse('@Html.Raw(Json.Serialize(Model.PurchaseOrderItems))');
+            console.log(PurchaseOrderItems);
+            if (PurchaseOrderItems && PurchaseOrderItems.length > 0) {
+                for (let i = 0; i < PurchaseOrderItems.length; ++i) {
+                    var productID = PurchaseOrderItems[i].productId;
+
+                    $('#productList select option[value="' + productID + '"]').attr('selected', 'selected');
+                    $('#productList select').attr('name', 'Product[' + counter + ']');
+                    $('#productList select').attr('value', productID);
+
+                    var selectItems = $('#productList').html();
+
+                    $('<tr id="tablerow' + counter + '"><td>' +
+                        selectItems +
+                        '</td>' +
+                        '<td>' +
+                        '<input type="text" class="text-box single-line" style="width: 100%;" name="Quantity[' + counter + ']" value="' + PurchaseOrderItems[i].quantity + '" required="required" />' +
+                        '</td>' +
+                        '<td>' +
+                        '<button type="button" class="btn btn-primary" onclick="removeTr(' + counter + ');">Delete</button>' +
+                        '</td>' +
+                        '</tr>').appendTo('#submissionTable > tbody');
+                    counter++;
+                }
+            }
+
+            $('#add').click(function () {
+                var selectItems = $('#productList').html();
+
+                $('#productList select option').removeAttr('selected');
+                $('#productList select').attr('name', 'Product[' + counter + ']');
+                $('#productList select').removeAttr('value');
+
+                var selectItems = $('#productList').html();
+
+                $('<tr id="tablerow' + counter + '"><td>' +
+                    selectItems +
+                    '</td>' +
+                    '<td>' +
+                    '<input type="text" class="text-box single-line" style="width: 100%;" name="Quantity[' + counter + ']" value="" required="required" />' +
+                    '</td>' +
+                    '<td>' +
+                    '<button type="button" class="btn btn-primary" onclick="removeTr(' + counter + ');">Delete</button>' +
+                    '</td>' +
+                    '</tr>').appendTo('#submissionTable > tbody');
+                counter++;
+                return false;
+            });
+        });
+        function removeTr(index) {
+            if (counter > 0) {
+                $('#tablerow' + index).remove();
+                counter--;
+            }
+            return false;
+        }
+        function printDiv() {
+            // Clone the content of the div to be printed
+            var content = $("#POMasterDiv").clone();
+
+            // Remove any buttons or elements that should not be printed
+            content.find(".no-print").remove();
+
+            // Create a new window for printing
+            var printWindow = window.open('', '', 'width=800,height=600');
+            printWindow.document.open();
+            printWindow.document.write('<html><head><title>Print</title></head><body>');
+
+            printWindow.document.write('<h1 style="text-align: center;">Purchase Order</h1>');
+
+            // Apply inline styles to format the printed content
+            printWindow.document.write('<div style="margin: 20px;">');
+
+            // Apply styles to format the dl element
+            printWindow.document.write('<dl style="margin: 10px 0; font-size: 16px;">');
+            printWindow.document.write('<dt style="font-weight: bold;">Order Date:</dt>');
+            printWindow.document.write('<dd>' + content.find("dd:eq(0)").html() + '</dd>');
+            printWindow.document.write('<dt style="font-weight: bold;">Supplier:</dt>');
+            printWindow.document.write('<dd>' + content.find("dd:eq(1)").html() + '</dd>');
+            printWindow.document.write('<dt style="font-weight: bold;">Supplier Address:</dt>');
+            printWindow.document.write('<dd>' + content.find("dd:eq(2)").html() + '</dd>');
+            printWindow.document.write('<dt style="font-weight: bold;">Supplier Phone:</dt>');
+            printWindow.document.write('<dd>' + content.find("dd:eq(3)").html() + '</dd>');
+            printWindow.document.write('<dt style="font-weight: bold;">Supplier Email:</dt>');
+            printWindow.document.write('<dd>' + content.find("dd:eq(4)").html() + '</dd>');
+            printWindow.document.write('<dt style="font-weight: bold;">Total Order Cost:</dt>');
+            printWindow.document.write('<dd>' + content.find("dd:eq(5)").html() + '</dd>');
+            printWindow.document.write('</dl>');
+
+            // Apply styles to format the table
+            printWindow.document.write('<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 16px;">');
+            printWindow.document.write('<thead>');
+            printWindow.document.write('<tr>');
+            printWindow.document.write('<th style="border: 1px solid #000; padding: 8px; text-align: left;">Product</th>');
+            printWindow.document.write('<th style="border: 1px solid #000; padding: 8px; text-align: left;">Quantity</th>');
+            printWindow.document.write('</tr>');
+            printWindow.document.write('</thead>');
+            printWindow.document.write('<tbody>');
+
+            // Iterate through table rows and apply styles
+            content.find("tr").each(function () {
+                printWindow.document.write('<tr>');
+                $(this).find("td").each(function () {
+                    printWindow.document.write('<td style="border: 1px solid #000; padding: 8px;">' + $(this).html() + '</td>');
+                });
+                printWindow.document.write('</tr>');
+            });
+
+            printWindow.document.write('</tbody>');
+            printWindow.document.write('</table>');
+            printWindow.document.write('</div>');
+
+            printWindow.document.close();
+
+            // Trigger the print dialog
+            printWindow.print();
+            printWindow.close();
+        }
+
+    </script>
+        }

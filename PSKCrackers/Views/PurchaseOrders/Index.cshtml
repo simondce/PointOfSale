@@ -41,7 +41,9 @@
                     <a asp-action="Edit" asp-route-id="@item.PurchaseOrderId">Edit</a> |
                     <a asp-action="ManagePO" asp-route-id="@item.PurchaseOrderId">ManagePO</a> |
                 <a asp-action="Details" asp-route-id="@item.PurchaseOrderId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PurchaseOrderId">Delete</a>
+                    <a asp-action="Delete" asp-route-id="@item.PurchaseOrderId">Delete</a> |
+                    @Html.ActionLink("Add To Inventory", "AddToInventory", new { id = item.PurchaseOrderId },
+                new { onclick = "return confirm('Are sure wants to add items to inventory?');" })
             </td>
         </tr>
 }

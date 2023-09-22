@@ -8,36 +8,280 @@
 <h1>Create</h1>
 
 <h4>Sale</h4>
-<hr />
-<div class="row">
-    <div class="col-md-10">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="SaleDate" class="control-label"></label>
-                <input asp-for="SaleDate" class="form-control" />
-                <span asp-validation-for="SaleDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CustomerId" class="control-label"></label>
-                <select asp-for="CustomerId" class ="form-control" asp-items="ViewBag.CustomerId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="DiscountPercentage" class="control-label"></label>
-                <input asp-for="DiscountPercentage" class="form-control" />
-                <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<!-- Available Stock Section -->
+<div class="container mt-4">
+    <div class="row">
+        <!-- Available Stock Section -->
+        <div class="col-lg-4">
+            <h2>Available Stock</h2>
+            <table class="table table-striped" id="availableStockTable">
+                <thead>
+                    <tr>
+                        <th style="display:none;">ProductID</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Stocck items will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Cart Items Section -->
+        <div class="col-lg-4">
+            <h2>Cart Items</h2>
+            <table class="table table-striped" id="cartTable">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Cart items will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Total Amount Calculation Section -->
+        <div class="col-lg-4">
+        <h2>Total Amount Calculation</h2>
+        <table class="table" id="totalAmountTable">
+            <tbody>
+                <tr>
+                    <td>Customer:</td>
+                    <td>
+                        <select id="SelectedCustomer" asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Total Amount:</td>
+                    <td id="totalAmount">₹0.00</td>
+                </tr>
+                <tr>
+                    <td>Discount %:</td>
+                    <td>
+                        <input type="number" id="discount" class="form-control">
+                    </td>
+                </tr>
+                <tr>
+                    <td>Discounted Total:</td>
+                    <td id="calculatedTotal">₹0.00</td>
+                </tr>
+            </tbody>
+        </table>
+            <button type="button" class="btn btn-primary" id="SaveInvoice">Save Invoice</button> <!-- Add Print Invoice button -->
+            <button type="button" class="btn btn-primary" id="printInvoice">Print Invoice</button> <!-- Add Print Invoice button -->
     </div>
 </div>
+</div>
+
 
 <div>
     <a asp-action="Index" class="btn btn-cancel">Back to List</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            // Sample available stock data (you can load this data dynamically)
+            var availableStock = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.AvailableStock))');
+
+            // Initialize the cart as an empty array
+            const cart = [];
+
+            // Function to populate the available stock table
+            function populateAvailableStockTable() {
+                const table = $("#availableStockTable");
+                table.find("tr:gt(0)").remove(); // Clear existing rows
+                availableStock.forEach(item => {
+                    table.append(`<tr><td style="display:none;">${item.product.productId}</td><td>${item.product.name}</td><td>₹${item.product.price.toFixed(2)}</td><td>${item.quantityInStock}</td></tr>`);
+                });
+            }
+
+
+            // Function to populate the cart table and update total amount
+            function updateCartAndTotal() {
+                const table = $("#cartTable");
+                table.find("tr:gt(0)").remove(); // Clear existing rows
+                let totalAmount = 0;
+
+                cart.forEach(item => {
+                    const subtotal = item.product.price * item.quantityInCart;
+                    totalAmount += subtotal;
+                    const row = `<tr data-productid="${item.product.productId}">
+                                                <td>${item.product.name}</td>
+                                                <td>₹${item.product.price.toFixed(2)}</td>
+                                                <td>
+                                                    <span class="cart-quantity">${item.quantityInCart}</span>
+                                                    <button class="btn btn-sm btn-primary reduce-quantity" data-productid="${item.product.productId}">-</button>
+                                                </td>
+                                                <td>₹${subtotal.toFixed(2)}</td>
+                                                <td><button class="btn btn-sm btn-danger remove-item" data-productid="${item.product.productId}">Remove</button></td>
+                                            </tr>`;
+                    table.append(row);
+                });
+
+                // Update the total amount
+                var discVal = $("#discount").val();
+                if (!discVal || discVal == "") { discVal = "0"; }
+                const discountPercentage = parseFloat(discVal);
+                const discountAmount = (discountPercentage / 100) * totalAmount; // Calculate discount amount
+                const discountedTotalAmount = totalAmount - discountAmount; // Apply discount
+                $("#totalAmount").text(`₹${totalAmount.toFixed(2)}`);
+
+                // Update the calculated total with discount applied
+                $("#calculatedTotal").text(`₹${discountedTotalAmount.toFixed(2)}`);
+            }
+
+            // Add item to the cart when a row in available stock is clicked
+            $("#availableStockTable").on("click", "tr", function () {
+                const row = $(this);
+                const productId = row.find("td:first").text();
+                const product = availableStock.find(item => item.productId === parseInt(productId));
+
+                if (product && product.quantityInStock > 0) {
+                    // Check if the product is already in the cart
+                    const cartItemIndex = cart.findIndex(item => item.product.productId === product.productId);
+
+                    if (cartItemIndex !== -1) {
+                        // If the product is in the cart, increase its quantity by 1
+                        cart[cartItemIndex].quantityInCart++;
+                    } else {
+                        // If the product is not in the cart, add it with a quantity of 1
+                        const cartItem = { ...product, quantityInCart: 1 }; // Clone the item
+                        cart.push(cartItem);
+                    }
+                    // Decrease available quantity by 1
+                    product.quantityInStock--;
+
+                    updateCartAndTotal();
+                    populateAvailableStockTable();
+                }
+            });
+
+            // Handle discount input change
+            $("#discount").on("input", function () {
+                updateCartAndTotal();
+            });
+
+            // Reduce quantity of an item when the "-" button is clicked
+            $("#cartTable").on("click", ".reduce-quantity", function () {
+                const productId = $(this).data("productid");
+                const cartItem = cart.find(item => item.product.productId === productId);
+
+                if (cartItem && cartItem.quantityInCart > 1) {
+                    // Reduce the quantity by 1
+                    cartItem.quantityInCart--;
+                    // Increase available quantity by 1
+                    const product = availableStock.find(item => item.productId === productId);
+                    product.quantityInStock++;
+                    updateCartAndTotal();
+                    populateAvailableStockTable();
+                }
+            });
+
+            // Remove item from the cart when the "Remove" button is clicked
+            $("#cartTable").on("click", ".remove-item", function () {
+                const productId = $(this).data("productid");
+                const cartItemIndex = cart.findIndex(item => item.product.productId === productId);
+
+                if (cartItemIndex !== -1) {
+                    // Increase available quantity
+                    const product = availableStock.find(item => item.productId === productId);
+                    product.quantityInStock += cart[cartItemIndex].quantityInCart;
+
+                    // Remove the item from the cart
+                    cart.splice(cartItemIndex, 1);
+                    updateCartAndTotal();
+                    populateAvailableStockTable();
+                }
+            });
+
+            // Initial population of available stock table
+            populateAvailableStockTable();
+
+            $("#printInvoice").on("click", function () {
+
+                const cartTable = document.getElementById("cartTable");
+                const totalAmount = document.getElementById("totalAmountTable");
+                const cartItems = Array.from(cartTable.querySelectorAll("tbody tr"));
+                const invoiceContents = cartTable.outerHTML + totalAmount.outerHTML;
+
+                const printWindow = window.open('', '', 'width=800, height=600');
+                printWindow.document.open();
+                printWindow.document.write('<html><head><title>Invoice</title></head><body>');
+
+                // Add cart items to the invoice with inline styles for formatting
+                printWindow.document.write('<h2>Cart Items</h2>');
+                printWindow.document.write('<table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">');
+                printWindow.document.write('<thead><tr style="background-color: #f2f2f2;"><th style="padding: 8px; text-align: left;">Product</th><th style="padding: 8px; text-align: left;">Price</th><th style="padding: 8px; text-align: left;">Quantity</th><th style="padding: 8px; text-align: left;">Subtotal</th></tr></thead>');
+                printWindow.document.write('<tbody>');
+                cartItems.forEach(item => {
+                    printWindow.document.write('<tr style="border: 1px solid #000;">' + item.innerHTML + '</tr>');
+                });
+                printWindow.document.write('</tbody>');
+                printWindow.document.write('</table>');
+
+
+                var allInputs = totalAmount.querySelectorAll("input,select,textarea");
+                for (var counter = 0; counter < allInputs.length; counter++) {
+                    var input = allInputs.item(counter);
+                    input.setAttribute("value", input.value);
+                }
+
+                // Add total amount with inline styles for formatting
+                printWindow.document.write('<h2>Total Amount Calculation</h2>');
+                printWindow.document.write('<div style="margin-top: 10px;">' + totalAmount.outerHTML + '</div>');
+
+                printWindow.document.close();
+                printWindow.print();
+                printWindow.close();
+            });
+
+            // Remove item from the cart when the "Remove" button is clicked
+            $("#SaveInvoice").on("click", function () {
+                // Create a Sale object with the cart items and other details
+                const sale = {
+                    saleItems: cart,
+                    totalAmount: parseFloat($("#totalAmount").text().replace("₹", "")),
+                    discountPercentage: parseFloat($("#discount").val()),
+                    discountedTotal: parseFloat($("#calculatedTotal").text().replace("₹", "")),
+                    customerId: parseInt($("#SelectedCustomer").val())
+                };
+
+                fetch('/Sales/Create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(sale)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = '/Sales';
+                        } else {
+                            // Handle errors
+                            alert('Failed to save sale data.');
+                        }
+                    })
+                    .catch(error => {
+                        alert('Error:', error);
+                    });
+
+            });
+
+
+        });
+
+    </script>
 }

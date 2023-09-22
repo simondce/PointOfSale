@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using PSKCrackers.Models;
 
 namespace PSKCrackers.Controllers
 {
+    [Authorize]
     public class PurchaseOrdersController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -27,6 +29,39 @@ namespace PSKCrackers.Controllers
             return View(await applicationDbContext.ToListAsync());
         }
 
+        public async Task<IActionResult> AddToInventory(int? id)
+        {
+            if (id == null || _context.PurchaseOrders == null)
+            {
+                return NotFound();
+            }
+
+            var purchaseOrder = await _context.PurchaseOrders
+                .Include(p => p.Supplier)
+                .Include(p => p.PurchaseOrderItems)
+                .FirstOrDefaultAsync(m => m.PurchaseOrderId == id);
+
+            purchaseOrder.PurchaseOrderItems.ForEach(u =>
+            {
+                if (_context.InventoryItems.Any(x => x.ProductId == u.ProductId))
+                {
+                    _context.InventoryItems.FirstOrDefault(x => x.ProductId == u.ProductId).QuantityInStock += u.Quantity;
+                }
+                else
+                {
+                    _context.InventoryItems.Add(new InventoryItem()
+                    {
+                        ProductId = u.ProductId,
+                        QuantityInStock = u.Quantity
+                    });
+                }
+            });
+
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
+        }
+
         // GET: PurchaseOrders/Details/5
         public async Task<IActionResult> ManagePO(int? id)
         {
@@ -39,18 +74,61 @@ namespace PSKCrackers.Controllers
                 .Include(p => p.Supplier)
                 .Include(p => p.PurchaseOrderItems)
                 .FirstOrDefaultAsync(m => m.PurchaseOrderId == id);
+
+            purchaseOrder.Supplier.SuppliedProducts = null;
+
             if (purchaseOrder == null)
             {
                 return NotFound();
             }
 
-            foreach (var product in _context.Products.Where(u => u.SupplierId == purchaseOrder.SupplierId))
+            ViewData["ProductId"] = new SelectList(_context.Products.Where(u => u.SupplierId == purchaseOrder.SupplierId), "ProductId", "Name");
+
+            return View(purchaseOrder);
+        }
+
+        [HttpPost]
+        public ActionResult ManagePO(PurchaseOrder _TableForm)
+        {
+
+            var purchaseOrder = _context.PurchaseOrders
+                .Include(p => p.Supplier)
+                .Include(p => p.PurchaseOrderItems)
+                .FirstOrDefault(m => m.PurchaseOrderId == _TableForm.PurchaseOrderId);
+
+            purchaseOrder.PurchaseOrderItems = new List<PurchaseOrderItem>();
+            decimal totalCost = 0;
+            //Loop through the forms
+            for (int i = 0; i <= Request.Form.Count; i++)
             {
-                if (!purchaseOrder.PurchaseOrderItems.Any(u => u.ProductId == product.ProductId))
+                var Product = Request.Form["Product[" + i + "]"];
+                var Quantity = Request.Form["Quantity[" + i + "]"];
+
+
+                if (Product.Count > 0 && Product.First() != null && Quantity.Count > 0 && Quantity.First() != null)
                 {
-                    purchaseOrder.PurchaseOrderItems.Add(new PurchaseOrderItem { ProductId = product.ProductId, Product = product, Quantity = 0, UnitPrice = 0 });
+                    if (purchaseOrder.PurchaseOrderItems.Any(u => u.ProductId == int.Parse(Product.First())))
+                    {
+                        ModelState.AddModelError("", "Duplicate Products selected");
+                        ViewData["ProductId"] = new SelectList(_context.Products.Where(u => u.SupplierId == purchaseOrder.SupplierId), "ProductId", "Name");
+
+                        return View(purchaseOrder);
+                    }
+                    purchaseOrder.PurchaseOrderItems.Add(new PurchaseOrderItem
+                    {
+                        ProductId = int.Parse(Product.First()),
+                        Quantity = int.Parse(Quantity.First())
+                    });
+
+                    totalCost += (_context.Products.FirstOrDefault(u => u.ProductId == int.Parse(Product)).Price * int.Parse(Quantity));
+                    //_TableForm.Add(new purchaseor { ClientSampleID = ClientSampleID, AcidStables = acidStables, AdditionalComments = additionalComments });
                 }
             }
+            purchaseOrder.TotalOrderCost = totalCost;
+
+            _context.SaveChanges();
+
+            ViewData["ProductId"] = new SelectList(_context.Products.Where(u => u.SupplierId == purchaseOrder.SupplierId), "ProductId", "Name");
 
             return View(purchaseOrder);
         }

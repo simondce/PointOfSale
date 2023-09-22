@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PSKCrackers.Data;
 
@@ -11,9 +12,10 @@ using PSKCrackers.Data;
 namespace PSKCrackers.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230922082539_psk5")]
+    partial class psk5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -392,14 +394,8 @@ namespace PSKCrackers.Migrations
                     b.Property<decimal?>("DiscountPercentage")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("DiscountedTotal")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<DateTime>("SaleDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("SaleId");
 
@@ -419,11 +415,14 @@ namespace PSKCrackers.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("QuantityInCart")
+                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<int>("SaleId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("SaleItemId");
 

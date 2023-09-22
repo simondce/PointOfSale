@@ -100,10 +100,6 @@
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
         public int Quantity { get; set; }
 
-        [Required(ErrorMessage = "Unit Price is required.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Unit Price must be greater than 0.")]
-        public decimal UnitPrice { get; set; }
-
         // Foreign key for PurchaseOrder
         public int PurchaseOrderId { get; set; }
         public virtual PurchaseOrder PurchaseOrder { get; set; }
@@ -131,6 +127,9 @@
         [DisplayFormat(DataFormatString = "{0}%")]
         public decimal? DiscountPercentage { get; set; }
 
+        public decimal TotalAmount { get; set; }
+        public decimal DiscountedTotal { get; set; }
+
         // Navigation property for SaleItems (items in the sale)
         public virtual ICollection<SaleItem> SaleItems { get; set; }
     }
@@ -144,11 +143,8 @@
 
         [Required(ErrorMessage = "Quantity is required.")]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
-        public int Quantity { get; set; }
+        public int QuantityInCart { get; set; }
 
-        [Required(ErrorMessage = "Unit Price is required.")]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Unit Price must be greater than 0.")]
-        public decimal UnitPrice { get; set; }
 
         // Foreign key for Sale
         public int SaleId { get; set; }
