@@ -174,6 +174,20 @@
                 updateCartAndTotal();
             });
 
+            function getCurrentDateFormatted() {
+                const months = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+
+                const currentDate = new Date();
+                const month = months[currentDate.getMonth()];
+                const day = currentDate.getDate();
+                const year = currentDate.getFullYear();
+
+                return `${month} ${day}, ${year}`;
+            }
+
             // Reduce quantity of an item when the "-" button is clicked
             $("#cartTable").on("click", ".reduce-quantity", function () {
                 const productId = $(this).data("productid");
@@ -211,37 +225,118 @@
             populateAvailableStockTable();
 
             $("#printInvoice").on("click", function () {
+                var discount = $("#discount").val();
+                var totalAmount = $("#totalAmount").text();
+                var calculatedTotal = $("#calculatedTotal").text();
 
-                const cartTable = document.getElementById("cartTable");
-                const totalAmount = document.getElementById("totalAmountTable");
-                const cartItems = Array.from(cartTable.querySelectorAll("tbody tr"));
-                const invoiceContents = cartTable.outerHTML + totalAmount.outerHTML;
+                if (!discount) {
+                    discount = 0;
+                }
 
                 const printWindow = window.open('', '', 'width=800, height=600');
                 printWindow.document.open();
-                printWindow.document.write('<html><head><title>Invoice</title></head><body>');
+                printWindow.document.write('<!DOCTYPE html>          \
+                <html>                                                               \
+                <head>                                                               \
+                    <meta charset="UTF-8">                                           \
+                    <title>Invoice</title>                                           \
+                    <style>                                                          \
+                        body {                                                       \
+                            font-family: Arial, sans-serif;                          \
+                        }                                                            \
+                        .invoice {                                                   \
+                            margin: 0 auto;                                          \
+                            width: 98%;                                              \
+                        }                                                            \
+                        .header {                                                    \
+                            text-align: center;                                      \
+                            background-color: #f2f2f2;                               \
+                            padding: 10px;                                           \
+                        }                                                            \
+                        .invoice-details {                                           \
+                            margin-top: 20px;                                        \
+                        }                                                            \
+                        .invoice-details h2 {                                        \
+                            border-bottom: 1px solid #ddd;                           \
+                            padding-bottom: 5px;                                     \
+                        }                                                            \
+                        .invoice-details .info {                                     \
+                            margin-top: 10px;                                        \
+                        }                                                            \
+                        .invoice-table {                                             \
+                            margin-top: 20px;                                        \
+                            border-collapse: collapse;                               \
+                            width: 100%;                                             \
+                        }                                                            \
+                        .invoice-table th, .invoice-table td {                       \
+                            border: 1px solid #ddd;                                  \
+                            padding: 8px;                                            \
+                            text-align: left;                                        \
+                        }                                                            \
+                        .invoice-table th {                                          \
+                            background-color: #f2f2f2;                               \
+                        }                                                            \
+                        .invoice-total {                                             \
+                            margin-top: 20px;                                        \
+                            text-align: right;                                       \
+                        }                                                            \
+                        .discount {                                                  \
+                            margin-top: 10px;                                        \
+                            text-align: right;                                       \
+                        }                                                            \
+                    </style>                                                         \
+                </head>                                                              \
+                <body>                                                               \
+                    <div class="invoice">                                            \
+                        <div class="header">                                         \
+                            <h1>PSK Crackers - Invoice</h1>                          \
+                        </div>                                                       \
+                        <div class="invoice-details">                                \
+                            <h2>Invoice Details</h2>                                 \
+                            <div class="info">');
 
-                // Add cart items to the invoice with inline styles for formatting
-                printWindow.document.write('<h2>Cart Items</h2>');
-                printWindow.document.write('<table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">');
-                printWindow.document.write('<thead><tr style="background-color: #f2f2f2;"><th style="padding: 8px; text-align: left;">Product</th><th style="padding: 8px; text-align: left;">Price</th><th style="padding: 8px; text-align: left;">Quantity</th><th style="padding: 8px; text-align: left;">Subtotal</th></tr></thead>');
-                printWindow.document.write('<tbody>');
-                cartItems.forEach(item => {
-                    printWindow.document.write('<tr style="border: 1px solid #000;">' + item.innerHTML + '</tr>');
+                printWindow.document.write('<p><strong>Date:</strong> ' + getCurrentDateFormatted() + '</p>');
+
+                printWindow.document.write('</div>   \
+                        </div>                                       \
+                        <table class="invoice-table">                \
+                            <thead>                                  \
+                                <tr>                                 \
+                                    <th>Item</th>                    \
+                                    <th>Quantity</th>                \
+                                    <th>Unit Price</th>              \
+                                    <th>Total</th>                   \
+                                </tr>                                \
+                            </thead>                                 \
+                            <tbody>');
+                debugger;
+                cart.forEach(item => {
+                    const subtotal = item.product.price * item.quantityInCart;
+
+                    printWindow.document.write('<tr>  \
+                                            <td>'+ item.product.name + '</td>                   \
+                                            <td>'+ item.quantityInCart + '</td>                        \
+                                                    <td>₹ '+ item.product.price.toFixed(2) + '</td>                   \
+                                                    <td>₹ '+ subtotal.toFixed(2) + '</td>                  \
+                                </tr>');
                 });
-                printWindow.document.write('</tbody>');
-                printWindow.document.write('</table>');
 
+                printWindow.document.write('</tbody></table>');
 
-                var allInputs = totalAmount.querySelectorAll("input,select,textarea");
-                for (var counter = 0; counter < allInputs.length; counter++) {
-                    var input = allInputs.item(counter);
-                    input.setAttribute("value", input.value);
-                }
+                printWindow.document.write('<div class="invoice-total">\
+                                            <p><strong>Total without discount:</strong> '+ totalAmount + '</p>\
+                                </div>');
 
-                // Add total amount with inline styles for formatting
-                printWindow.document.write('<h2>Total Amount Calculation</h2>');
-                printWindow.document.write('<div style="margin-top: 10px;">' + totalAmount.outerHTML + '</div>');
+                printWindow.document.write('<div class="discount">\
+                                            <p><strong>Discount:</strong>'+ discount + ' %</p>\
+                        </div>');
+
+                printWindow.document.write('<div class="invoice-total">\
+                                            <p><strong>Total:</strong> '+ calculatedTotal + '</p>\
+                        </div>');
+
+                printWindow.document.write('</div>');
+
 
                 printWindow.document.close();
                 printWindow.print();
