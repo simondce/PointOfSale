@@ -87,7 +87,7 @@
             </fieldset>
         }
 
-      
+
     </div>
 </div>
 <div>
@@ -98,11 +98,17 @@
     <script type="text/javascript">
         var counter = 0;
         $(function () {
-            var PurchaseOrderItems = JSON.parse('@Html.Raw(Json.Serialize(Model.PurchaseOrderItems))');
+            debugger;
+            const PurchaseOrderItems = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+                                        Model.PurchaseOrderItems,
+                                        Newtonsoft.Json.Formatting.None,new Newtonsoft.Json.JsonSerializerSettings{
+                                            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                                        }));
+            //var PurchaseOrderItems = JSON.parse(jsonstring);
             console.log(PurchaseOrderItems);
             if (PurchaseOrderItems && PurchaseOrderItems.length > 0) {
                 for (let i = 0; i < PurchaseOrderItems.length; ++i) {
-                    var productID = PurchaseOrderItems[i].productId;
+                    var productID = PurchaseOrderItems[i].ProductId;
 
                     $('#productList select option[value="' + productID + '"]').attr('selected', 'selected');
                     $('#productList select').attr('name', 'Product[' + counter + ']');
@@ -114,7 +120,7 @@
                         selectItems +
                         '</td>' +
                         '<td>' +
-                        '<input type="text" class="text-box single-line" style="width: 100%;" name="Quantity[' + counter + ']" value="' + PurchaseOrderItems[i].quantity + '" required="required" />' +
+                        '<input type="text" class="text-box single-line" style="width: 100%;" name="Quantity[' + counter + ']" value="' + PurchaseOrderItems[i].Quantity + '" required="required" />' +
                         '</td>' +
                         '<td>' +
                         '<button type="button" class="btn btn-primary" onclick="removeTr(' + counter + ');">Delete</button>' +

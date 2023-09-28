@@ -25,7 +25,7 @@ namespace PSKCrackers.Controllers
         // GET: InventoryItems
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.InventoryItems.Include(i => i.Product);
+            var applicationDbContext = _context.InventoryItems.Include(i => i.Product).Include(i => i.Product.Supplier);
             return View(await applicationDbContext.ToListAsync());
         }
 

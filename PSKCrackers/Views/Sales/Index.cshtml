@@ -22,26 +22,39 @@
             <th>
                 @Html.DisplayNameFor(model => model.DiscountPercentage)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalAmount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DiscountedTotal)
+            </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.SaleDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Customer.Address)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DiscountPercentage)
-            </td>
-            <td>
-                <a asp-action="Details" asp-route-id="@item.SaleId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.SaleId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SaleDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Customer.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DiscountPercentage)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TotalAmount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DiscountedTotal)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.SaleId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.SaleId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

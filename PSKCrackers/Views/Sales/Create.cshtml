@@ -21,6 +21,7 @@
                         <th>Product</th>
                         <th>Price</th>
                         <th>Quantity</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -94,7 +95,12 @@
     <script>
         $(document).ready(function () {
             // Sample available stock data (you can load this data dynamically)
-            var availableStock = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.AvailableStock))');
+            //var availableStock = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.AvailableStock))');
+            var availableStock = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+            ViewBag.AvailableStock,
+            Newtonsoft.Json.Formatting.None,new Newtonsoft.Json.JsonSerializerSettings{
+            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            }));
 
             // Initialize the cart as an empty array
             const cart = [];
@@ -104,7 +110,7 @@
                 const table = $("#availableStockTable");
                 table.find("tr:gt(0)").remove(); // Clear existing rows
                 availableStock.forEach(item => {
-                    table.append(`<tr><td style="display:none;">${item.product.productId}</td><td>${item.product.name}</td><td>₹${item.product.price.toFixed(2)}</td><td>${item.quantityInStock}</td></tr>`);
+                    table.append(`<tr><td style="display:none;">${item.Product.ProductId}</td><td>${item.Product.Name}</td><td>₹${item.Product.Price.toFixed(2)}</td><td>${item.QuantityInStock}</td><td><button type="button" class="btn btn-success">Add</button></td></tr>`);
                 });
             }
 
@@ -116,17 +122,17 @@
                 let totalAmount = 0;
 
                 cart.forEach(item => {
-                    const subtotal = item.product.price * item.quantityInCart;
+                    const subtotal = item.Product.Price * item.QuantityInCart;
                     totalAmount += subtotal;
-                    const row = `<tr data-productid="${item.product.productId}">
-                                                <td>${item.product.name}</td>
-                                                <td>₹${item.product.price.toFixed(2)}</td>
+                    const row = `<tr data-productid="${item.Product.ProductId}">
+                                                <td>${item.Product.Name}</td>
+                                                <td>₹${item.Product.Price.toFixed(2)}</td>
                                                 <td>
-                                                    <span class="cart-quantity">${item.quantityInCart}</span>
-                                                    <button class="btn btn-sm btn-primary reduce-quantity" data-productid="${item.product.productId}">-</button>
+                                                    <span class="cart-quantity">${item.QuantityInCart}</span>
+                                                    <button class="btn btn-sm btn-primary reduce-quantity" data-productid="${item.Product.ProductId}">-</button>
                                                 </td>
                                                 <td>₹${subtotal.toFixed(2)}</td>
-                                                <td><button class="btn btn-sm btn-danger remove-item" data-productid="${item.product.productId}">Remove</button></td>
+                                                <td><button class="btn btn-sm btn-danger remove-item" data-productid="${item.Product.ProductId}">Remove</button></td>
                                             </tr>`;
                     table.append(row);
                 });
@@ -147,22 +153,22 @@
             $("#availableStockTable").on("click", "tr", function () {
                 const row = $(this);
                 const productId = row.find("td:first").text();
-                const product = availableStock.find(item => item.productId === parseInt(productId));
+                const product = availableStock.find(item => item.ProductId === parseInt(productId));
 
-                if (product && product.quantityInStock > 0) {
+                if (product && product.QuantityInStock > 0) {
                     // Check if the product is already in the cart
-                    const cartItemIndex = cart.findIndex(item => item.product.productId === product.productId);
+                    const cartItemIndex = cart.findIndex(item => item.Product.ProductId === product.ProductId);
 
                     if (cartItemIndex !== -1) {
                         // If the product is in the cart, increase its quantity by 1
-                        cart[cartItemIndex].quantityInCart++;
+                        cart[cartItemIndex].QuantityInCart++;
                     } else {
                         // If the product is not in the cart, add it with a quantity of 1
-                        const cartItem = { ...product, quantityInCart: 1 }; // Clone the item
+                        const cartItem = { ...product, QuantityInCart: 1 }; // Clone the item
                         cart.push(cartItem);
                     }
                     // Decrease available quantity by 1
-                    product.quantityInStock--;
+                    product.QuantityInStock--;
 
                     updateCartAndTotal();
                     populateAvailableStockTable();
@@ -191,14 +197,14 @@
             // Reduce quantity of an item when the "-" button is clicked
             $("#cartTable").on("click", ".reduce-quantity", function () {
                 const productId = $(this).data("productid");
-                const cartItem = cart.find(item => item.product.productId === productId);
+                const cartItem = cart.find(item => item.Product.ProductId === productId);
 
-                if (cartItem && cartItem.quantityInCart > 1) {
+                if (cartItem && cartItem.QuantityInCart > 1) {
                     // Reduce the quantity by 1
-                    cartItem.quantityInCart--;
+                    cartItem.QuantityInCart--;
                     // Increase available quantity by 1
-                    const product = availableStock.find(item => item.productId === productId);
-                    product.quantityInStock++;
+                    const product = availableStock.find(item => item.ProductId === productId);
+                    product.QuantityInStock++;
                     updateCartAndTotal();
                     populateAvailableStockTable();
                 }
@@ -207,12 +213,12 @@
             // Remove item from the cart when the "Remove" button is clicked
             $("#cartTable").on("click", ".remove-item", function () {
                 const productId = $(this).data("productid");
-                const cartItemIndex = cart.findIndex(item => item.product.productId === productId);
+                const cartItemIndex = cart.findIndex(item => item.Product.ProductId === productId);
 
                 if (cartItemIndex !== -1) {
                     // Increase available quantity
-                    const product = availableStock.find(item => item.productId === productId);
-                    product.quantityInStock += cart[cartItemIndex].quantityInCart;
+                    const product = availableStock.find(item => item.ProductId === productId);
+                    product.QuantityInStock += cart[cartItemIndex].QuantityInCart;
 
                     // Remove the item from the cart
                     cart.splice(cartItemIndex, 1);
@@ -289,7 +295,7 @@
                 <body>                                                               \
                     <div class="invoice">                                            \
                         <div class="header">                                         \
-                            <h1>PSK Crackers - Invoice</h1>                          \
+                                    <img src="/img/logo.png" style="width: 100px; float: left;"> <h1>PSK Fancy Crackers - Invoice</h1>                           \
                         </div>                                                       \
                         <div class="invoice-details">                                \
                             <h2>Invoice Details</h2>                                 \
@@ -311,12 +317,12 @@
                             <tbody>');
                 debugger;
                 cart.forEach(item => {
-                    const subtotal = item.product.price * item.quantityInCart;
+                    const subtotal = item.Product.Price * item.QuantityInCart;
 
                     printWindow.document.write('<tr>  \
-                                            <td>'+ item.product.name + '</td>                   \
-                                            <td>'+ item.quantityInCart + '</td>                        \
-                                                    <td>₹ '+ item.product.price.toFixed(2) + '</td>                   \
+                                            <td>'+ item.Product.Name + '</td>                   \
+                                            <td>'+ item.QuantityInCart + '</td>                        \
+                                                    <td>₹ '+ item.Product.Price.toFixed(2) + '</td>                   \
                                                     <td>₹ '+ subtotal.toFixed(2) + '</td>                  \
                                 </tr>');
                 });

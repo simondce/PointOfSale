@@ -19,6 +19,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Product)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Product.Supplier)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -30,7 +33,10 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Product.Name)
-            </td>
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.Supplier.Name)
+                </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.InventoryItemId">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.InventoryItemId">Details</a> |

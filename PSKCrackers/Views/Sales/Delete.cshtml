@@ -73,7 +73,7 @@
                         </tr>
                         <tr>
                             <td>Discount %:</td>
-                            <td>
+                            <td id="discount">
                                 @Html.DisplayFor(u=> u.DiscountPercentage)
                             </td>
                         </tr>
@@ -99,17 +99,27 @@
     <script>
         $(document).ready(function () {
             // Sample available stock data (you can load this data dynamically)
-            var availableStock = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.AvailableStock))');
+            //var availableStock = JSON.parse('@Html.Raw(Json.Serialize(ViewBag.AvailableStock))');
+            var availableStock = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+            ViewBag.AvailableStock,
+            Newtonsoft.Json.Formatting.None,new Newtonsoft.Json.JsonSerializerSettings{
+            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            }));
 
             // Initialize the cart as an empty array
-            const cart = JSON.parse('@Html.Raw(Json.Serialize(Model.SaleItems))');
+            //const cart = JSON.parse('@Html.Raw(Json.Serialize(Model.SaleItems))');
+            var cart = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+            Model.SaleItems,
+            Newtonsoft.Json.Formatting.None,new Newtonsoft.Json.JsonSerializerSettings{
+            ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            }));
 
             // Function to populate the available stock table
             function populateAvailableStockTable() {
                 const table = $("#availableStockTable");
                 table.find("tr:gt(0)").remove(); // Clear existing rows
                 availableStock.forEach(item => {
-                    table.append(`<tr><td style="display:none;">${item.product.productId}</td><td>${item.product.name}</td><td>₹${item.product.price.toFixed(2)}</td><td>${item.quantityInStock}</td></tr>`);
+                    table.append(`<tr><td style="display:none;">${item.Product.ProductId}</td><td>${item.Product.Name}</td><td>₹${item.Product.Price.toFixed(2)}</td><td>${item.QuantityInStock}</td></tr>`);
                 });
             }
 
@@ -121,13 +131,13 @@
                 let totalAmount = 0;
 
                 cart.forEach(item => {
-                    const subtotal = item.product.price * item.quantityInCart;
+                    const subtotal = item.Product.Price * item.QuantityInCart;
                     totalAmount += subtotal;
-                    const row = `<tr data-productid="${item.product.productId}">
-                                                                <td>${item.product.name}</td>
-                                                                <td>₹${item.product.price.toFixed(2)}</td>
+                    const row = `<tr data-productid="${item.Product.ProductId}">
+                                                                <td>${item.Product.Name}</td>
+                                                                <td>₹${item.Product.Price.toFixed(2)}</td>
                                                                 <td>
-                                                                    <span class="cart-quantity">${item.quantityInCart}</span>
+                                                                    <span class="cart-quantity">${item.QuantityInCart}</span>
                                                                 </td>
                                                                 <td>₹${subtotal.toFixed(2)}</td>
                                                             </tr>`;
@@ -135,9 +145,13 @@
                 });
 
                 // Update the total amount
-                var discVal = $("#discount").val();
-                if (!discVal || discVal == "") { discVal = "0"; }
-                const discountPercentage = parseFloat(discVal);
+                var discVal = $("#discount").text();
+                debugger;
+                if (!discVal || discVal == "") { discVal = "0"; } else {
+                    discVal = discVal.replace("%", "");
+                }
+                var discountPercentage = parseFloat(discVal);
+                if (isNaN(discountPercentage)) { discountPercentage = 0; }
                 const discountAmount = (discountPercentage / 100) * totalAmount; // Calculate discount amount
                 const discountedTotalAmount = totalAmount - discountAmount; // Apply discount
                 $("#totalAmount").text(`₹${totalAmount.toFixed(2)}`);
