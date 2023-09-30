@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,6 +11,9 @@ using Microsoft.EntityFrameworkCore;
 using PSKCrackers.Data;
 using PSKCrackers.Helpers;
 using PSKCrackers.Models;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System.Data;
+using System.Reflection;
 
 namespace PSKCrackers.Controllers
 {
@@ -160,14 +165,85 @@ namespace PSKCrackers.Controllers
             {
                 _context.InventoryItems.Remove(inventoryItem);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool InventoryItemExists(int id)
         {
-          return (_context.InventoryItems?.Any(e => e.InventoryItemId == id)).GetValueOrDefault();
+            return (_context.InventoryItems?.Any(e => e.InventoryItemId == id)).GetValueOrDefault();
+        }
+
+        // Action for exporting data to Excel
+        [HttpPost]
+        public ActionResult ExportToExcel()
+        {
+            string tmpPath = Path.GetTempFileName();
+
+            var _data = _context.InventoryItems.OrderByDescending(u=>u.QuantityInStock).ToList();
+
+            CreateExcelFile(_data, tmpPath);
+
+            // Generate the Excel file
+            byte[] excelBytes = System.IO.File.ReadAllBytes(tmpPath);
+
+            // Return the Excel file as a download
+            return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Inventory.xlsx");
+        }
+
+        public void CreateExcelFile(List<InventoryItem> data, string filePath)
+        {
+            using (SpreadsheetDocument spreadsheetDocument = SpreadsheetDocument.Create(filePath, SpreadsheetDocumentType.Workbook))
+            {
+                WorkbookPart workbookPart = spreadsheetDocument.AddWorkbookPart();
+                WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+
+                Workbook workbook = new Workbook();
+                Worksheet worksheet = new Worksheet();
+                SheetData sheetData = new SheetData();
+
+                var objectType = data[0].GetType();
+                PropertyInfo[] properties = objectType.GetProperties();
+
+                // Create headers dynamically from the type of the first object in the list
+                if (data.Count > 0)
+                {
+                    Row headerRow = new Row();
+                    foreach (PropertyInfo property in properties)
+                    {
+                        headerRow.Append(CreateCell(property.Name));
+                    }
+                    sheetData.AppendChild(headerRow);
+                }
+
+                foreach (var item in data)
+                {
+                    Row dataRow = new Row();
+                    foreach (PropertyInfo property in properties)
+                    {
+                        object value = property.GetValue(item);
+                        dataRow.Append(CreateCell(value != null ? value.ToString() : string.Empty));
+                    }
+                    sheetData.AppendChild(dataRow);
+                }
+
+                worksheet.AppendChild(sheetData);
+
+                Sheets sheets = new Sheets();
+                Sheet sheet = new Sheet() { Id = spreadsheetDocument.WorkbookPart.GetIdOfPart(worksheetPart), SheetId = 1, Name = "Sheet1" };
+                sheets.Append(sheet);
+                workbook.Append(sheets);
+
+                workbookPart.Workbook = workbook;
+                workbookPart.Workbook.Save();
+
+            }
+        }
+
+        private Cell CreateCell(string text)
+        {
+            return new Cell(new InlineString(new Text(text)));
         }
     }
 }

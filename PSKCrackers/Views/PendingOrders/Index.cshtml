@@ -5,10 +5,10 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h1>Sales List</h1>
+<h1>Pending Orders</h1>
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
+    <a asp-controller="Sales" asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -39,7 +39,7 @@
         {
             <tr>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.SaleId">@Html.DisplayFor(modelItem => item.SaleId)</a>
+                    <a asp-controller="Sales" asp-action="Details" asp-route-id="@item.SaleId">@Html.DisplayFor(modelItem => item.SaleId)</a>
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.SaleDate)
@@ -57,8 +57,8 @@
                     @Html.DisplayFor(modelItem => item.DiscountedTotal)
                 </td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.SaleId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.SaleId">Delete</a>
+                    <a asp-controller="Sales" asp-action="Details" asp-route-id="@item.SaleId">Details</a> |
+                    <a asp-controller="Sales" asp-action="Delete" asp-route-id="@item.SaleId">Delete</a>
                 </td>
             </tr>
         }

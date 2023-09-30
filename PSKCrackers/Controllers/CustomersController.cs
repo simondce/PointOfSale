@@ -25,9 +25,9 @@ namespace PSKCrackers.Controllers
         // GET: Customers
         public async Task<IActionResult> Index()
         {
-              return _context.Customers != null ? 
-                          View(await _context.Customers.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.Customers'  is null.");
+            return _context.Customers != null ?
+                        View(await _context.Customers.ToListAsync()) :
+                        Problem("Entity set 'ApplicationDbContext.Customers'  is null.");
         }
 
         // GET: Customers/Details/5
@@ -62,6 +62,10 @@ namespace PSKCrackers.Controllers
         public async Task<IActionResult> Create([Bind("CustomerId,Name,Email,PhoneNumber,DateOfBirth,Address")] Customer customer)
         {
             Utils.removeVirtualProperties(customer, ModelState);
+            if (_context.Customers.Any(u => u.PhoneNumber == customer.PhoneNumber))
+            {
+                ModelState.AddModelError("PhoneNumber", "The given phone number already exists");
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(customer);
@@ -100,6 +104,10 @@ namespace PSKCrackers.Controllers
             }
 
             Utils.removeVirtualProperties(customer, ModelState);
+            if (_context.Customers.Any(u => u.PhoneNumber == customer.PhoneNumber))
+            {
+                ModelState.AddModelError("PhoneNumber", "The given phone number already exists");
+            }
             if (ModelState.IsValid)
             {
                 try
@@ -155,14 +163,14 @@ namespace PSKCrackers.Controllers
             {
                 _context.Customers.Remove(customer);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CustomerExists(int id)
         {
-          return (_context.Customers?.Any(e => e.CustomerId == id)).GetValueOrDefault();
+            return (_context.Customers?.Any(e => e.CustomerId == id)).GetValueOrDefault();
         }
     }
 }

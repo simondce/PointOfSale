@@ -25,7 +25,9 @@ namespace PSKCrackers.Controllers
         // GET: Sales
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Sales.Include(s => s.Customer);
+            var applicationDbContext = _context.Sales
+                .Where(u => u.IsConfirmedOrder)
+                .Include(s => s.Customer);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -58,13 +60,13 @@ namespace PSKCrackers.Controllers
         {
             ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "Name");
             ViewData["AvailableStock"] = _context.InventoryItems
-                .Where(u=>u.QuantityInStock > 0)
+                .Where(u => u.QuantityInStock > 0)
                 .Include(p => p.Product).ToArray();
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Sale sale)
+        public Sale? Create([FromBody] Sale sale)
         {
 
             // Convert the Sale model into the appropriate database entities and save them to the database.
@@ -79,8 +81,51 @@ namespace PSKCrackers.Controllers
                 DiscountPercentage = sale.DiscountPercentage,
                 DiscountedTotal = sale.DiscountedTotal,
                 SaleDate = DateTime.Now,
-                CustomerId = sale.CustomerId
+                IsConfirmedOrder = sale.IsConfirmedOrder,
+                Customer = sale.Customer
             };
+
+            if (saleEntity.Customer != null)
+            {
+                if (saleEntity.Customer.CustomerId == 0 &&
+                    !string.IsNullOrEmpty(saleEntity.Customer.Name) &&
+                    !string.IsNullOrEmpty(saleEntity.Customer.Address) &&
+                    !string.IsNullOrEmpty(saleEntity.Customer.PhoneNumber))
+                {
+                    if (_context.Customers.Any(u => u.PhoneNumber == saleEntity.Customer.PhoneNumber))
+                    {
+                        throw new Exception("The given phone number already exists");
+                    }
+                    _context.Customers.Add(saleEntity.Customer);
+                    _context.SaveChanges();
+
+                    var createdCustomer = _context.Customers.FirstOrDefault(u => u.PhoneNumber == saleEntity.Customer.PhoneNumber);
+
+                    if (createdCustomer != null)
+                    {
+                        saleEntity.CustomerId = createdCustomer.CustomerId;
+                    }
+                    else
+                    {
+                        throw new Exception("Customer details error.");
+                    }
+                }
+                else if (saleEntity.Customer.CustomerId > 0 &&
+                    !string.IsNullOrEmpty(saleEntity.Customer.PhoneNumber))
+                {
+                    saleEntity.CustomerId = saleEntity.Customer.CustomerId;
+                }
+                else
+                {
+                    throw new Exception("Customer details error.");
+                }
+            }
+            else
+            {
+                throw new Exception("Customer details Null.");
+            }
+
+            saleEntity.Customer = null;
 
             // Map SaleItem instances to SaleItemEntity instances and add them to the SaleEntity
             saleEntity.SaleItems = sale.SaleItems.Select(item => new SaleItem
@@ -93,19 +138,22 @@ namespace PSKCrackers.Controllers
 
             _context.Sales.Add(saleEntity);
 
-            foreach(var item in saleEntity.SaleItems)
+            if (saleEntity.IsConfirmedOrder)
             {
-                var inventory = _context.InventoryItems.FirstOrDefault(u=>u.ProductId == item.ProductId);
-                if(inventory != null)
+                foreach (var item in saleEntity.SaleItems)
                 {
-                    inventory.QuantityInStock -= item.QuantityInCart;
+                    var inventory = _context.InventoryItems.FirstOrDefault(u => u.ProductId == item.ProductId);
+                    if (inventory != null)
+                    {
+                        inventory.QuantityInStock -= item.QuantityInCart;
+                    }
                 }
             }
 
 
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
 
-            return Ok(); // Sale saved successfully
+            return saleEntity; // Sale saved successfully
         }
 
         // POST: Sales/Create
@@ -215,18 +263,21 @@ namespace PSKCrackers.Controllers
                 return Problem("Entity set 'ApplicationDbContext.Sales'  is null.");
             }
             var sale = await _context.Sales
-                .Include(u=>u.SaleItems)
-                .FirstOrDefaultAsync(u=>u.SaleId == id);
+                .Include(u => u.SaleItems)
+                .FirstOrDefaultAsync(u => u.SaleId == id);
 
-
-            foreach (var item in sale.SaleItems)
+            if (sale.IsConfirmedOrder)
             {
-                var inventory = _context.InventoryItems.FirstOrDefault(u => u.ProductId == item.ProductId);
-                if (inventory != null)
+                foreach (var item in sale.SaleItems)
                 {
-                    inventory.QuantityInStock += item.QuantityInCart;
+                    var inventory = _context.InventoryItems.FirstOrDefault(u => u.ProductId == item.ProductId);
+                    if (inventory != null)
+                    {
+                        inventory.QuantityInStock += item.QuantityInCart;
+                    }
                 }
             }
+
             if (sale != null)
             {
                 _context.Sales.Remove(sale);
@@ -238,7 +289,27 @@ namespace PSKCrackers.Controllers
 
         private bool SaleExists(int id)
         {
-          return (_context.Sales?.Any(e => e.SaleId == id)).GetValueOrDefault();
+            return (_context.Sales?.Any(e => e.SaleId == id)).GetValueOrDefault();
+        }
+
+        // POST: /User/CheckUser
+        [HttpGet]
+        public Customer CheckUser(string phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                throw new Exception("Phone number is required.");
+            }
+
+            // Search for the user in the simulated data
+            var user = _context.Customers.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+
+            if (user != null)
+            {
+                return user;
+            }
+
+            return new Customer();
         }
     }
 }

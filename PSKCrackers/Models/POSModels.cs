@@ -49,10 +49,6 @@
         [Required(ErrorMessage = "Supplier name is required.")]
         public string Name { get; set; }
 
-        //[DataType(DataType.EmailAddress)]
-        [EmailAddress(ErrorMessage = "Invalid email address.")]
-        public string Email { get; set; }
-
         //[DataType(DataType.PhoneNumber)]
         [Phone(ErrorMessage = "Invalid phone number.")]
         public string PhoneNumber { get; set; }
@@ -127,6 +123,8 @@
         [DisplayFormat(DataFormatString = "{0}%")]
         public decimal? DiscountPercentage { get; set; }
 
+        public bool IsConfirmedOrder { get; set; }
+
         public decimal TotalAmount { get; set; }
         public decimal DiscountedTotal { get; set; }
 
@@ -161,18 +159,10 @@
         [Required(ErrorMessage = "Customer name is required.")]
         public string Name { get; set; }
 
-        //[DataType(DataType.EmailAddress)]
-        [EmailAddress(ErrorMessage = "Invalid email address.")]
-        public string Email { get; set; }
 
         //[DataType(DataType.PhoneNumber)]
         [Phone(ErrorMessage = "Invalid phone number.")]
         public string PhoneNumber { get; set; }
-
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        [Display(Name = "Date of Birth")]
-        public DateTime? DateOfBirth { get; set; }
 
         [Required(ErrorMessage = "Address is required.")]
         public string Address { get; set; }
