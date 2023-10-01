@@ -5,23 +5,21 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
-
-<h4>Sale</h4>
+<h4>Billing</h4>
 <!-- Available Stock Section -->
-<div class="container mt-4">
+
     <div class="row">
         <!-- Available Stock Section -->
-        <div class="col-lg-4">
+    <div class="col-lg-4 scrollTableDiv">
             <h2>Available Stock</h2>
-            <table class="table table-striped" id="availableStockTable" style="display: block; overflow: scroll; max-height: 450px;overflow-x: hidden;">
+            <table class="table table-striped" id="availableStockTable">
                 <thead>
                     <tr>
                         <th style="display:none;">ProductID</th>
                         <th>Product</th>
                         <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Action</th>
+                        <th>Qty</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -31,16 +29,16 @@
         </div>
 
         <!-- Cart Items Section -->
-        <div class="col-lg-4">
+    <div class="col-lg-4 scrollTableDiv">
             <h2>Cart Items</h2>
-            <table class="table table-striped" id="cartTable" style="display: block; overflow: scroll; max-height: 450px;overflow-x: hidden;">
+            <table class="table table-striped" id="cartTable">
                 <thead>
                     <tr>
                         <th>Product</th>
                         <th>Price</th>
-                        <th>Quantity</th>
+                        <th>Count</th>
                         <th>Subtotal</th>
-                        <th>Action</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,7 +116,7 @@
             <button type="button" class="btn btn-secondary" id="printInvoice">Print Invoice</button> <!-- Add Print Invoice button -->
         </div>
     </div>
-</div>
+
 
 
 <div>
@@ -149,7 +147,7 @@
                 const table = $("#availableStockTable");
                 table.find("tr:gt(0)").remove(); // Clear existing rows
                 availableStock.forEach(item => {
-                    table.append(`<tr><td style="display:none;">${item.Product.ProductId}</td><td>${item.Product.Name}</td><td>₹${item.Product.Price.toFixed(2)}</td><td>${item.QuantityInStock}</td><td><button type="button" class="btn btn-success">Add</button></td></tr>`);
+                    table.append(`<tr><td style="display:none;">${item.Product.ProductId}</td><td>${item.Product.Name}</td><td>₹${item.Product.Price.toFixed(2)}</td><td>${item.QuantityInStock}</td><td><button type="button" class="btn btn-success">+</button></td></tr>`);
                 });
             }
 
@@ -171,7 +169,7 @@
                                                                                                                                                                                                     <button class="btn btn-sm btn-primary reduce-quantity" data-productid="${item.Product.ProductId}">-</button>
                                                                                                                                                                                                 </td>
                                                                                                                                                                                                 <td>₹${subtotal.toFixed(2)}</td>
-                                                                                                                                                                                                <td><button class="btn btn-sm btn-danger remove-item" data-productid="${item.Product.ProductId}">Remove</button></td>
+                                                                                                                                                                                                <td><button class="btn btn-sm btn-danger remove-item" data-productid="${item.Product.ProductId}">-</button></td>
                                                                                                                                                                                             </tr>`;
                     table.append(row);
                 });
@@ -564,7 +562,7 @@
                         .then(data => {
                             document.getElementById("txtCustomerContact").disabled = true;
                             document.getElementById("btnCheckUser").disabled = true;
-                            if (data && data.customerId & data.customerId != 0) {
+                            if (data && data.customerId && data.customerId != 0) {
                                 // User exists, show name and address
                                 document.getElementById("txtCustomerName").value = data.name;
                                 document.getElementById("txtCustomerID").value = data.customerId;

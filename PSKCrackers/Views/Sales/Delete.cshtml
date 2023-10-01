@@ -12,18 +12,18 @@
     <h4>Sale</h4>
     <hr />
     <!-- Available Stock Section -->
-    <div class="container mt-4">
+    
         <div class="row">
             <!-- Available Stock Section -->
-            <div class="col-lg-4">
+        <div class="col-lg-4 scrollTableDiv">
                 <h2>Available Stock</h2>
-                <table class="table table-striped" id="availableStockTable" style="display: block; overflow: scroll; max-height: 450px;overflow-x: hidden;">
+                <table class="table table-striped" id="availableStockTable">
                     <thead>
                         <tr>
                             <th style="display:none;">ProductID</th>
                             <th>Product</th>
                             <th>Price</th>
-                            <th>Quantity</th>
+                        <th>Qty</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -33,14 +33,14 @@
             </div>
 
             <!-- Cart Items Section -->
-            <div class="col-lg-4">
+        <div class="col-lg-4 scrollTableDiv">
                 <h2>Cart Items</h2>
-                <table class="table table-striped" id="cartTable" style="display: block; overflow: scroll; max-height: 450px;overflow-x: hidden;">
+                <table class="table table-striped" id="cartTable">
                     <thead>
                         <tr>
                             <th>Product</th>
                             <th>Price</th>
-                            <th>Quantity</th>
+                        <th>Count</th>
                             <th>Subtotal</th>
                         </tr>
                     </thead>
@@ -120,7 +120,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    
 
     <form asp-action="Delete">
         <input type="hidden" asp-for="SaleId" />
